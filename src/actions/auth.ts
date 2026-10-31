@@ -7,14 +7,14 @@ import { redirect } from "next/navigation";
 import { signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendMail } from "@/lib/mail";
-import type { FormState } from "@/lib/form";
+import { formDataToObject, type FormState } from "@/lib/form";
 import { forgotSchema, loginSchema, resetSchema, signupSchema } from "@/lib/validation";
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "");
 
 export async function loginAction(_: FormState, fd: FormData): Promise<FormState> {
-  const parsed = loginSchema.safeParse(Object.fromEntries(fd));
+  const parsed = loginSchema.safeParse(formDataToObject(fd));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   try {
     await signIn("credentials", { ...parsed.data, redirectTo: "/" });
@@ -26,7 +26,7 @@ export async function loginAction(_: FormState, fd: FormData): Promise<FormState
 }
 
 export async function signupAction(_: FormState, fd: FormData): Promise<FormState> {
-  const parsed = signupSchema.safeParse(Object.fromEntries(fd));
+  const parsed = signupSchema.safeParse(formDataToObject(fd));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
   const { name, email, password } = parsed.data;
 
@@ -64,7 +64,7 @@ export async function forgotPasswordAction(_: FormState, fd: FormData): Promise<
 }
 
 export async function resetPasswordAction(_: FormState, fd: FormData): Promise<FormState> {
-  const parsed = resetSchema.safeParse(Object.fromEntries(fd));
+  const parsed = resetSchema.safeParse(formDataToObject(fd));
   if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors };
 
   const record = await prisma.passwordResetToken.findUnique({ where: { tokenHash: sha(parsed.data.token) } });

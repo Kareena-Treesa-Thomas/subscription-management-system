@@ -27,6 +27,7 @@ enum SubscriptionStatus {
   QUOTATION
   CONFIRMED
   ACTIVE
+  PAUSED
   CLOSED
 }
 
@@ -48,15 +49,26 @@ enum DiscountScope {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
+  id            String               @id @default(cuid())
+  email         String               @unique
   name          String
   passwordHash  String
-  role          Role           @default(CUSTOMER)
+  role          Role                 @default(CUSTOMER)
   address       String?
-  createdAt     DateTime       @default(now())
+  createdAt     DateTime             @default(now())
+  resetTokens   PasswordResetToken[]
   subscriptions Subscription[]
   invoices      Invoice[]
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }
 
 model Product {
