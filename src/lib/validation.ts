@@ -74,3 +74,10 @@ export const quotationTemplateInput = z.object({
 });
 
 export const simulateDateInput = z.object({ date: z.coerce.date().nullable() });
+
+export const paymentInput = z.object({
+  method: z.string().trim().min(1).max(40),
+  amount: z.coerce.number().positive(),
+  paidOn: z.coerce.date().optional(),
+  note: z.string().trim().max(500).optional(),
+});

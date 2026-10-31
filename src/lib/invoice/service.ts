@@ -1,5 +1,8 @@
+import { Prisma } from "@prisma/client";
 import { prisma, type Tx } from "@/lib/prisma";
 import { HttpError } from "@/lib/http";
+import type { z } from "zod";
+import type { paymentInput } from "@/lib/validation";
 
 export async function confirmInvoice(id: string) {
   const inv = await prisma.invoice.findUnique({ where: { id } });
@@ -43,5 +46,45 @@ export async function refreshInvoicePaidStatus(tx: Tx, invoiceId: string) {
   return tx.invoice.update({
     where: { id: invoiceId },
     data: { amountPaid: paid, status: settled && inv.status === "CONFIRMED" ? "PAID" : inv.status },
+  });
+}
+
+export async function recordPayment(
+  invoiceId: string,
+  input: z.infer<typeof paymentInput>,
+  actor: { userId: string; role: "ADMIN" | "STAFF" | "CUSTOMER" },
+) {
+  return prisma.$transaction(async (tx) => {
+    const invoice = await tx.invoice.findUnique({ where: { id: invoiceId } });
+    if (!invoice) throw new HttpError(404, "Invoice not found");
+    if (actor.role === "CUSTOMER" && invoice.customerId !== actor.userId) {
+      throw new HttpError(403, "Forbidden");
+    }
+    if (invoice.status === "DRAFT") {
+      throw new HttpError(409, "Confirm the invoice before recording payment");
+    }
+    if (invoice.status === "CANCELLED") {
+      throw new HttpError(409, "Cannot pay a cancelled invoice");
+    }
+    if (invoice.status === "PAID") {
+      throw new HttpError(409, "Invoice is already paid");
+    }
+
+    const amount = new Prisma.Decimal(input.amount);
+    const remaining = invoice.total.sub(invoice.amountPaid);
+    if (amount.gt(remaining)) {
+      throw new HttpError(400, `Payment exceeds the remaining balance of ${remaining.toFixed(2)}`);
+    }
+
+    await tx.payment.create({
+      data: {
+        invoiceId,
+        method: input.method,
+        amount,
+        paidOn: input.paidOn ?? new Date(),
+        note: input.note,
+      },
+    });
+    return refreshInvoicePaidStatus(tx, invoiceId);
   });
 }
