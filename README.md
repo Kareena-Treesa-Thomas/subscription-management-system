@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Subscription Management System
 Brightloop Software: plans, subscriptions, recurring billing, payments, finance dashboard.
 Odoo x Make-A-Ton 9.0 Kochi Hackathon 2026.
@@ -28,7 +27,3 @@ Odoo x Make-A-Ton 9.0 Kochi Hackathon 2026.
 `POST /api/billing/run` · `GET/POST /api/subscriptions` · `POST /api/subscriptions/from-template` · `POST /api/subscriptions/:id/transition` · `GET/POST /api/quotation-templates` · `GET /api/invoices` · `POST /api/invoices/:id/{confirm,cancel,send}` · `GET/POST /api/admin/simulate-date`
 
 Dev auth until real login lands: send headers `x-dev-role: ADMIN` and `x-dev-user: <user id>`.
-=======
-# subscription-management-system
-Unified subscription management platform: products, plans, quotations, recurring invoicing, discounts, payments and revenue dashboard. Built for Odoo x Make-A-Ton 9.0 Kochi Hackathon 2026.
->>>>>>> 9d94d5b124606e296a74351ec4aebede17456d55

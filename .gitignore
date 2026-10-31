@@ -1,11 +1,5 @@
 node_modules
 .next
 .env
-<<<<<<< HEAD
 *.tsbuildinfo
 next-env.d.ts
-=======
-.env.local
-next-env.d.ts
-*.tsbuildinfo
->>>>>>> 9d94d5b124606e296a74351ec4aebede17456d55
