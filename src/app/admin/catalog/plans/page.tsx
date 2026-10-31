@@ -1,5 +1,5 @@
 "use client";
-import CrudManager, { money, fmtDate, badge } from "@/components/catalog/CrudManager";
+import CrudManager, { money, fmtDate } from "@/components/catalog/CrudManager";
 import { planSchema } from "@/lib/validation/catalog";
 
 const yes = (v: boolean) => (v ? "Yes" : "No");
@@ -17,10 +17,9 @@ export default function PlansPage() {
         { name: "availableFrom", label: "Available from", type: "date" },
         { name: "availableTo", label: "Available until", type: "date" },
         { name: "autoClose", label: "Close automatically when the plan ends", type: "checkbox" },
-        { name: "closable", label: "Customer can close early", type: "checkbox", defaultValue: true },
+        { name: "closableEarly", label: "Customer can close early", type: "checkbox", defaultValue: true },
         { name: "pausable", label: "Customer can pause", type: "checkbox" },
         { name: "renewable", label: "Customer can renew", type: "checkbox", defaultValue: true },
-        { name: "active", label: "Active", type: "checkbox", defaultValue: true },
       ]}
       columns={[
         { key: "name", label: "Name" },
@@ -28,8 +27,7 @@ export default function PlansPage() {
         { key: "billingPeriod", label: "Billing" },
         { key: "minQuantity", label: "Min qty" },
         { key: "availability", label: "Available", render: (r) => `${fmtDate(r.availableFrom)} → ${fmtDate(r.availableTo)}` },
-        { key: "flags", label: "Auto-close / Early / Pause / Renew", render: (r) => [r.autoClose, r.closable, r.pausable, r.renewable].map(yes).join(" / ") },
-        { key: "active", label: "Status", render: (r) => badge(r.active) },
+        { key: "flags", label: "Auto-close / Early / Pause / Renew", render: (r) => [r.autoClose, r.closableEarly, r.pausable, r.renewable].map(yes).join(" / ") },
       ]}
     />
   );

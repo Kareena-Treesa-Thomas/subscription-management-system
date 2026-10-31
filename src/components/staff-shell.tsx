@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BadgePercent, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, Settings, UserPlus, X } from "lucide-react";
+import { BadgePercent, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, UserPlus, X } from "lucide-react";
 import { Logo } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -13,10 +13,9 @@ const NAV = [
   { label: "Subscriptions", href: "/subscriptions", icon: Repeat, roles: ["ADMIN", "STAFF"] },
   { label: "Invoices", href: "/invoices", icon: FileText, roles: ["ADMIN", "STAFF"] },
   { label: "Payments", href: "/payments", icon: CreditCard, roles: ["ADMIN", "STAFF"] },
-  { label: "Products & plans", href: "/products", icon: Package, roles: ["ADMIN", "STAFF"] },
+  { label: "Products & plans", href: "/products", icon: Package, roles: ["ADMIN"] },
   { label: "Discounts", href: "/discounts", icon: BadgePercent, roles: ["ADMIN"] },
   { label: "Staff", href: "/staff", icon: UserPlus, roles: ["ADMIN"] },
-  { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "STAFF"] },
 ];
 
 export function StaffShell({ role, topRight, children }: { role: string; topRight: React.ReactNode; children: React.ReactNode }) {

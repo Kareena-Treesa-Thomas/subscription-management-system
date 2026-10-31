@@ -16,7 +16,6 @@ export const productSchema = z.object({
   costPrice: money.default(0),
   notes: z.string().trim().max(1000, "At most 1000 characters").nullable().optional(),
   taxId: optionalId,
-  active: z.boolean().default(true),
 });
 
 export const variantSchema = z.object({
@@ -24,12 +23,11 @@ export const variantSchema = z.object({
   attribute: z.string().trim().min(1, "Required").max(60), // e.g. Brand
   value: z.string().trim().min(1, "Required").max(60), // e.g. Odoo
   extraPrice: z.coerce.number().min(-99999999.99).max(99999999.99).default(0),
-  active: z.boolean().default(true),
 });
 
 export const taxSchema = z.object({
   name,
-  ratePercent: z.coerce.number().min(0, "Must be 0 or more").max(100, "Cannot exceed 100%"),
+  ratePct: z.coerce.number().min(0, "Must be 0 or more").max(100, "Cannot exceed 100%"),
   active: z.boolean().default(true),
 });
 
@@ -42,10 +40,9 @@ export const planSchema = z
     availableFrom: optionalDate,
     availableTo: optionalDate,
     autoClose: z.boolean().default(false),
-    closable: z.boolean().default(true),
+    closableEarly: z.boolean().default(true),
     pausable: z.boolean().default(false),
     renewable: z.boolean().default(true),
-    active: z.boolean().default(true),
   })
   .refine((p) => !p.availableFrom || !p.availableTo || p.availableTo >= p.availableFrom, {
     message: "End date must be on or after the start date",
@@ -59,10 +56,10 @@ export const discountSchema = z
     value: positiveMoney,
     scope: z.enum(["PRODUCT", "SUBSCRIPTION"]),
     productId: optionalId,
-    minPurchaseAmount: optionalMoney,
+    minPurchase: optionalMoney,
     minQuantity: optionalInt,
     startDate: z.coerce.date(),
-    endDate: optionalDate,
+    endDate: z.coerce.date(),
     usageLimit: optionalInt,
     active: z.boolean().default(true),
   })
@@ -74,7 +71,7 @@ export const discountSchema = z
     message: "Choose a product for product-scoped discounts",
     path: ["productId"],
   })
-  .refine((d) => !d.endDate || d.endDate >= d.startDate, {
+  .refine((d) => d.endDate >= d.startDate, {
     message: "End date must be on or after the start date",
     path: ["endDate"],
   });

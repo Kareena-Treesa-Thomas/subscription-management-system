@@ -19,13 +19,22 @@ type Options = {
   filterFields?: string[];
   include?: Record<string, unknown>;
   orderBy?: Record<string, unknown>;
+  supportsActive?: boolean;
 };
 
 type Ctx = { params: Promise<{ id?: string }> };
 
 /** Builds list / create / get / update / deactivate handlers.
  *  Reads: admin + staff. Writes: admin only. Deletes are SOFT (active=false) because invoices reference these rows. */
-export function crud({ delegate, schema, searchField = "name", filterFields = [], include, orderBy = { createdAt: "desc" } }: Options) {
+export function crud({
+  delegate,
+  schema,
+  searchField = "name",
+  filterFields = [],
+  include,
+  orderBy = { createdAt: "desc" },
+  supportsActive = true,
+}: Options) {
   const list = (req: NextRequest) =>
     handle(async () => {
       await requireStaff();
@@ -35,7 +44,7 @@ export function crud({ delegate, schema, searchField = "name", filterFields = []
       const where: Record<string, unknown> = {};
       const q = sp.get("q")?.trim();
       if (q) where[searchField] = { contains: q, mode: "insensitive" };
-      if (sp.get("active") === "true") where.active = true;
+      if (supportsActive && sp.get("active") === "true") where.active = true;
       for (const f of filterFields) {
         const v = sp.get(f);
         if (v) where[f] = v;
@@ -76,6 +85,9 @@ export function crud({ delegate, schema, searchField = "name", filterFields = []
   const remove = (_req: NextRequest, ctx: Ctx) =>
     handle(async () => {
       await requireAdmin();
+      if (!supportsActive) {
+        return NextResponse.json({ error: "This catalog item cannot be deactivated" }, { status: 409 });
+      }
       const { id } = await ctx.params;
       const row = await delegate.update({ where: { id }, data: { active: false }, include });
       return NextResponse.json(row);

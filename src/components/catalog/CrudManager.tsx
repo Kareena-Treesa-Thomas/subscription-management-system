@@ -162,7 +162,7 @@ export default function CrudManager({ entity, title, singular, schema, fields, c
                 {columns.map((c) => <td key={c.key} className="px-4 py-3">{c.render ? c.render(row) : String(row[c.key] ?? "—")}</td>)}
                 <td className="whitespace-nowrap px-4 py-3 text-right">
                   <button onClick={() => openEdit(row)} className="mr-3 text-indigo-600 hover:underline">Edit</button>
-                  {row.active !== false && <button onClick={() => deactivate(row)} className="text-red-600 hover:underline">Deactivate</button>}
+                  {row.active === true && <button onClick={() => deactivate(row)} className="text-red-600 hover:underline">Deactivate</button>}
                 </td>
               </tr>
             ))}
