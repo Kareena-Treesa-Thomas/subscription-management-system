@@ -12,7 +12,7 @@ export default async function PortalHome() {
 
   // Always scoped to the signed-in customer — never trust an id from the URL.
   const [subs, outstanding] = await Promise.all([
-    prisma.subscription.findMany({ where: { customerId: user.id }, include: { plan: true }, orderBy: { createdAt: "desc" } }),
+    prisma.subscription.findMany({ where: { customerId: user.id }, include: { plan: true, lines: true }, orderBy: { createdAt: "desc" } }),
     prisma.invoice.aggregate({ where: { customerId: user.id, status: "CONFIRMED" }, _sum: { total: true }, _count: true }),
   ]);
 
@@ -48,7 +48,7 @@ export default async function PortalHome() {
                   <p className="text-xs text-ink-mute">{s.number}</p>
                   <h3 className="mt-0.5 font-semibold">{s.plan.name}</h3>
                   <p className="mt-0.5 text-sm text-ink-soft">
-                    {money(Number(s.plan.price))} per {periodLabel(s.plan.billingPeriod)} × {s.quantity} {s.quantity === 1 ? "seat" : "seats"}
+                    {money(Number(s.plan.price))} per {periodLabel(s.plan.billingPeriod)} × {s.lines.reduce((total, line) => total + line.quantity, 0)} seats
                   </p>
                 </div>
                 <Badge tone={statusTone[s.status]}>{s.status.charAt(0) + s.status.slice(1).toLowerCase()}</Badge>
@@ -57,10 +57,10 @@ export default async function PortalHome() {
                 <div><dt className="text-ink-mute">Started</dt><dd className="font-medium">{fmtDate(s.startDate)}</dd></div>
                 <div><dt className="text-ink-mute">Expires</dt><dd className="font-medium">{fmtDate(s.expiryDate)}</dd></div>
                 <div><dt className="text-ink-mute">Payment terms</dt><dd className="font-medium">{s.paymentTerms}</dd></div>
-                <div><dt className="text-ink-mute">Recurring total</dt><dd className="font-medium">{money(Number(s.plan.price) * s.quantity)}</dd></div>
+                <div><dt className="text-ink-mute">Recurring total</dt><dd className="font-medium">{money(Number(s.plan.price) * s.lines.reduce((total, line) => total + line.quantity, 0))}</dd></div>
               </dl>
               <div className="mt-4 border-t border-line pt-4">
-                <SubscriptionActions id={s.id} status={s.status} pausable={s.plan.pausable} closable={s.plan.closable} renewable={s.plan.renewable} />
+                <SubscriptionActions id={s.id} status={s.status} pausable={s.plan.pausable} closable={s.plan.closableEarly} renewable={s.plan.renewable} />
               </div>
             </Card>
           ))}

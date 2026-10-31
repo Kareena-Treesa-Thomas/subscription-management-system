@@ -22,7 +22,7 @@ export async function changeSubscription(id: string, op: SubOp): Promise<{ error
     if (sub.status !== "PAUSED") return { error: "This subscription isn't paused." };
     await prisma.subscription.update({ where: { id }, data: { status: "ACTIVE" } });
   } else if (op === "close") {
-    if (!plan.closable) return { error: "This plan can't be closed early." };
+    if (!plan.closableEarly) return { error: "This plan can't be closed early." };
     if (sub.status === "CLOSED") return { error: "Already closed." };
     await prisma.subscription.update({ where: { id }, data: { status: "CLOSED", expiryDate: new Date() } });
   } else if (op === "renew") {

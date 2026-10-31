@@ -8,6 +8,19 @@
   :focus-visible { @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white; }
 }
 
+.auth-gradient {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255,255,255,.92), transparent 28%),
+    radial-gradient(circle at 78% 12%, rgba(129,113,255,.25), transparent 30%),
+    linear-gradient(135deg, #f8f8ff 0%, #e8e7ff 52%, #dcd9ff 100%);
+}
+
+.grid-fade {
+  background-image: linear-gradient(rgba(85,67,220,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(85,67,220,.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
 @keyframes orbit { to { transform: rotate(360deg); } }
 .orbit { animation: orbit 28s linear infinite; transform-origin: 50% 50%; }
 @media (prefers-reduced-motion: reduce) { .orbit { animation: none; } }
