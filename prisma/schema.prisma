@@ -49,16 +49,17 @@ enum DiscountScope {
 }
 
 model User {
-  id            String               @id @default(cuid())
-  email         String               @unique
-  name          String
-  passwordHash  String
-  role          Role                 @default(CUSTOMER)
-  address       String?
-  createdAt     DateTime             @default(now())
-  resetTokens   PasswordResetToken[]
-  subscriptions Subscription[]
-  invoices      Invoice[]
+  id               String               @id @default(cuid())
+  email            String               @unique
+  name             String
+  passwordHash     String
+  role             Role                 @default(CUSTOMER)
+  address          String?
+  createdAt        DateTime             @default(now())
+  resetTokens      PasswordResetToken[]
+  paymentsRecorded Payment[]            @relation("PaymentRecordedBy")
+  subscriptions    Subscription[]
+  invoices         Invoice[]
 }
 
 model PasswordResetToken {
@@ -247,18 +248,20 @@ model InvoiceLine {
 }
 
 model Payment {
-  id        String   @id @default(cuid())
-  invoiceId String
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
-  method    String
-  amount    Decimal  @db.Decimal(12, 2)
-  paidOn    DateTime
-  note      String?
+  id           String   @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice  @relation(fields: [invoiceId], references: [id])
+  recordedById String?
+  recordedBy   User?    @relation("PaymentRecordedBy", fields: [recordedById], references: [id])
+  method       String
+  amount       Decimal  @db.Decimal(12, 2)
+  paidOn       DateTime
+  note         String?
 
   @@index([invoiceId])
 }
 
-// Key/value store: "simulatedDate", counters
+// Key/value store: simulated_date, counters
 model AppSetting {
   key   String @id
   value String

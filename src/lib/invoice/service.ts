@@ -79,6 +79,7 @@ export async function recordPayment(
     await tx.payment.create({
       data: {
         invoiceId,
+        recordedById: actor.userId,
         method: input.method,
         amount,
         paidOn: input.paidOn ?? new Date(),

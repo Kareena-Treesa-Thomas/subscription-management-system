@@ -77,7 +77,11 @@ export const quotationTemplateInput = z.object({
   lines: z.array(subscriptionLineInput).min(1),
 });
 
-export const simulateDateInput = z.object({ date: z.coerce.date().nullable() });
+export const simulateDateInput = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must use YYYY-MM-DD format")
+    .transform((value) => new Date(`${value}T00:00:00Z`))
+    .nullable(),
+});
 
 export const paymentInput = z.object({
   method: z.string().trim().min(1).max(40),
