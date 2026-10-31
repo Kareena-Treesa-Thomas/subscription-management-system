@@ -1,3 +1,6 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { reactStrictMode: true };
+const nextConfig = {
+  outputFileTracingRoot: process.cwd(),
+};
+
 export default nextConfig;
