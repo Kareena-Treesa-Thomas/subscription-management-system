@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
 import { fmtDate, money } from "@/lib/utils";
 
-export const metadata = { title: "My invoices — Brightloop" };
+export const metadata = { title: "My invoices - Brightloop" };
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 10;
 
@@ -43,7 +43,7 @@ export default async function PortalInvoices({ searchParams }: { searchParams: P
                     <tr key={inv.id}>
                       <td className="px-5 py-3 font-medium">{inv.number}</td>
                       <td className="px-5 py-3 text-ink-soft">{inv.subscription.number}</td>
-                      <td className="px-5 py-3 text-ink-soft">{fmtDate(inv.periodStart)} – {fmtDate(inv.periodEnd)}</td>
+                      <td className="px-5 py-3 text-ink-soft">{fmtDate(inv.periodStart)} ΓÇô {fmtDate(inv.periodEnd)}</td>
                       <td className="px-5 py-3 text-ink-soft">{fmtDate(inv.dueDate)}</td>
                       <td className="px-5 py-3 text-right font-medium tabular-nums">{money(Number(inv.total))}</td>
                       <td className="px-5 py-3">
