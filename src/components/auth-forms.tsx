@@ -29,15 +29,15 @@ function useZodAction(action: (s: FormState, fd: FormData) => Promise<FormState>
   return { state, formAction, onSubmit, err };
 }
 
-export function LoginForm({ resetOk }: { resetOk?: boolean }) {
+export function LoginForm({ resetOk, initialEmail = "", initialPassword = "" }: { resetOk?: boolean; initialEmail?: string; initialPassword?: string }) {
   const { state, formAction, onSubmit, err } = useZodAction(loginAction, loginSchema);
   return (
     <form action={formAction} onSubmit={onSubmit} noValidate className="space-y-4">
       {resetOk && <Alert tone="green">Password updated. Sign in with your new password.</Alert>}
       {state.error && <Alert>{state.error}</Alert>}
-      <Field label="Email" name="email" type="email" autoComplete="email" placeholder="you@company.com" error={err("email")} />
+      <Field label="Email" name="email" type="email" autoComplete="email" placeholder="you@company.com" defaultValue={initialEmail} error={err("email")} />
       <div>
-        <PasswordField label="Password" showRules={false} error={err("password")} />
+        <PasswordField label="Password" showRules={false} initialValue={initialPassword} error={err("password")} />
         <div className="mt-1.5 text-right">
           <Link href="/forgot-password" className="text-xs font-medium text-brand-600 hover:underline">Forgot password?</Link>
         </div>

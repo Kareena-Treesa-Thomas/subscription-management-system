@@ -7,10 +7,10 @@ import { passwordRules } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 
 /** Password input with show/hide toggle and a live rule checklist. */
-export function PasswordField({ name = "password", label = "Password", error, showRules = true }: {
-  name?: string; label?: string; error?: string; showRules?: boolean;
+export function PasswordField({ name = "password", label = "Password", error, showRules = true, initialValue = "" }: {
+  name?: string; label?: string; error?: string; showRules?: boolean; initialValue?: string;
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue);
   const [show, setShow] = useState(false);
   return (
     <div>
