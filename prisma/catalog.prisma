@@ -1,0 +1,115 @@
+// ===== CATALOG & PRICING (Athira-Maria) =====
+// Paste into prisma/schema.prisma (Prisma needs ONE schema file).
+// If the shared schema already has Product/Plan/Tax/Discount, merge fields instead of duplicating.
+// Then: npx prisma migrate dev --name catalog
+
+enum ProductType {
+  SOFTWARE
+  ADDON
+  SERVICE
+  PHYSICAL
+}
+
+enum BillingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
+enum DiscountScope {
+  PRODUCT
+  SUBSCRIPTION
+}
+
+model Tax {
+  id          String    @id @default(cuid())
+  name        String
+  ratePercent Decimal   @db.Decimal(5, 2)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  products    Product[]
+
+  @@map("taxes")
+}
+
+model Product {
+  id         String           @id @default(cuid())
+  name       String
+  type       ProductType      @default(SOFTWARE)
+  salesPrice Decimal          @db.Decimal(12, 2)
+  costPrice  Decimal          @default(0) @db.Decimal(12, 2)
+  notes      String?
+  active     Boolean          @default(true)
+  taxId      String?
+  tax        Tax?             @relation(fields: [taxId], references: [id])
+  variants   ProductVariant[]
+  discounts  Discount[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([active])
+  @@index([name])
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute  String // e.g. "Brand"
+  value      String // e.g. "Odoo"
+  extraPrice Decimal  @default(0) @db.Decimal(12, 2) // e.g. 560
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([productId, attribute, value])
+  @@map("product_variants")
+}
+
+model Plan {
+  id             String        @id @default(cuid())
+  name           String
+  price          Decimal       @db.Decimal(12, 2)
+  billingPeriod  BillingPeriod @default(MONTHLY)
+  minQuantity    Int           @default(1)
+  availableFrom  DateTime?
+  availableTo    DateTime?
+  autoCloseAtEnd Boolean       @default(false)
+  closableEarly  Boolean       @default(true)
+  pausable       Boolean       @default(false)
+  renewable      Boolean       @default(true)
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([active, billingPeriod])
+  @@map("plans")
+}
+
+model Discount {
+  id                String        @id @default(cuid())
+  name              String
+  type              DiscountType
+  value             Decimal       @db.Decimal(12, 2)
+  scope             DiscountScope @default(SUBSCRIPTION)
+  productId         String?
+  product           Product?      @relation(fields: [productId], references: [id])
+  minPurchaseAmount Decimal?      @db.Decimal(12, 2)
+  minQuantity       Int?
+  startDate         DateTime
+  endDate           DateTime?
+  usageLimit        Int?
+  timesUsed         Int           @default(0)
+  active            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([active, startDate, endDate])
+  @@map("discounts")
+}
