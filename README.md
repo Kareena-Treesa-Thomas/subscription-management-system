@@ -8,6 +8,83 @@ customer access, and finance reporting.
 The application is built to run locally with Next.js, Prisma, and PostgreSQL.
 It uses real database records rather than static demo JSON.
 
+## Product brief
+
+Brightloop Software sells business software, add-ons, and product variants on
+monthly and yearly subscriptions. Before this system, subscriptions lived in
+spreadsheets, renewals depended on reminders, invoices were typed manually,
+payments were matched from bank statements, and revenue reports were assembled
+at the end of each quarter.
+
+This application provides one workflow for the complete subscription lifecycle:
+
+1. A customer creates a unique account with a strong password and can recover
+   access through a reset link.
+2. An administrator configures products, variants, plans, tax rules, and
+   discounts.
+3. Staff create a subscription directly or from a quotation template.
+4. The billing engine creates invoices for due subscriptions with lines, tax,
+   discounts, and totals already calculated.
+5. Finance records payments against invoices and sees paid, outstanding, and
+   overdue balances.
+6. The dashboard reports active subscriptions, collected revenue, outstanding
+   balances, overdue aging, MRR, and ARR.
+7. Customers use the portal to view only their own subscriptions and invoices.
+
+The design supports ordinary billing-month scenarios including launching a new
+plan, converting a quote, billing hundreds of subscriptions, applying
+quantity-based discounts automatically, recording payments received through
+different methods, and simulating a future date for a deterministic demo.
+
+## Business requirements covered
+
+### New customer registration
+
+- Email addresses are unique.
+- Passwords must exceed eight characters and include uppercase, lowercase, and
+  special characters.
+- Customers can sign in, sign out, request a reset link, and set a new
+  password.
+- Role-based access separates administrators, staff, and customers.
+- Customers can access only their own portal data.
+- Only administrators can create staff accounts.
+
+### Product and plan launch
+
+- Products contain name, type, sales price, cost price, and notes.
+- Variants can add an extra price, such as the Odoo brand surcharge.
+- Plans support daily, weekly, monthly, and yearly billing.
+- Plans support minimum quantities, availability dates, auto-close, early close,
+  pause, and renewal rules.
+- Administrators control tax and discount configuration.
+
+### Quote-to-subscription workflow
+
+- Quotation templates define a plan, product lines, and validity period.
+- A subscription receives a unique number, customer, plan, dates, payment terms,
+  and detailed subscription lines.
+- The lifecycle is `DRAFT -> QUOTATION -> CONFIRMED -> ACTIVE -> CLOSED`.
+
+### Billing month
+
+- Due active subscriptions are billed by the billing engine.
+- Invoices contain customer data, product lines, tax, discounts, and totals.
+- Billing is idempotent and does not create duplicate invoices for a period.
+- Teams can confirm, cancel, send, and record payment against invoices.
+- Simulated dates allow billing and overdue scenarios to be demonstrated without
+  changing the machine clock.
+
+### Finance operations
+
+- Payments capture method, amount, date, note, invoice, and authenticated actor.
+- Partial payments are supported.
+- Overpayments, future-dated payments, and payments on invalid invoice states
+  are rejected.
+- Invoice balances and paid status update atomically.
+- Finance users can filter and paginate operational lists.
+- Dashboard aggregates are computed from PostgreSQL data and support thousands
+  of subscription records.
+
 ## Features
 
 ### Subscription and billing
