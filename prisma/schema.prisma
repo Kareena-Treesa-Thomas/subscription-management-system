@@ -1,0 +1,118 @@
+// NOTE for merge: Kareena owns the master schema. User + PasswordResetToken are mine;
+// Plan/Subscription/Invoice are minimal versions so the portal runs standalone.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum BillingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  DRAFT
+  QUOTATION
+  CONFIRMED
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+model User {
+  id            String               @id @default(cuid())
+  name          String
+  email         String               @unique
+  passwordHash  String
+  role          Role                 @default(CUSTOMER)
+  createdAt     DateTime             @default(now())
+  resetTokens   PasswordResetToken[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+
+  @@index([role])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  name          String
+  price         Decimal        @db.Decimal(12, 2)
+  billingPeriod BillingPeriod
+  minQuantity   Int            @default(1)
+  autoClose     Boolean        @default(false)
+  closable      Boolean        @default(true)
+  pausable      Boolean        @default(true)
+  renewable     Boolean        @default(true)
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id           String             @id @default(cuid())
+  number       String             @unique
+  customerId   String
+  customer     User               @relation(fields: [customerId], references: [id])
+  planId       String
+  plan         Plan               @relation(fields: [planId], references: [id])
+  status       SubscriptionStatus @default(DRAFT)
+  quantity     Int                @default(1)
+  startDate    DateTime
+  expiryDate   DateTime?
+  paymentTerms String             @default("Net 15")
+  createdAt    DateTime           @default(now())
+  invoices     Invoice[]
+
+  @@index([status])
+  @@index([customerId])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  number         String        @unique
+  subscriptionId String
+  subscription   Subscription  @relation(fields: [subscriptionId], references: [id])
+  customerId     String
+  customer       User          @relation(fields: [customerId], references: [id])
+  status         InvoiceStatus @default(DRAFT)
+  periodStart    DateTime
+  periodEnd      DateTime
+  dueDate        DateTime
+  subtotal       Decimal       @db.Decimal(12, 2)
+  tax            Decimal       @db.Decimal(12, 2)
+  discount       Decimal       @default(0) @db.Decimal(12, 2)
+  total          Decimal       @db.Decimal(12, 2)
+  createdAt      DateTime      @default(now())
+
+  @@unique([subscriptionId, periodStart])
+  @@index([status, dueDate])
+  @@index([customerId])
+}
