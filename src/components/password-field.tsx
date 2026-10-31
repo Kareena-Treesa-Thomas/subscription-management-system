@@ -31,7 +31,7 @@ export function PasswordField({ name = "password", label = "Password", error, sh
           {passwordRules.map((r) => {
             const ok = r.test(value);
             return (
-              <li key={r.label} className={cn("flex items-center gap-1.5", ok ? "text-brand-600" : "text-ink-mute")}>
+              <li key={r.label} className={cn("flex items-center gap-1.5", ok ? "text-emerald-600" : "text-ink-mute")}>
                 {ok ? <Check className="h-3.5 w-3.5" /> : <Circle className="h-3 w-3" />}
                 {r.label}
               </li>

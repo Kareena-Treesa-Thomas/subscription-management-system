@@ -17,7 +17,7 @@ export function Card({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) 
 }
 
 const tones = {
-  green: "bg-brand-50 text-brand-700 ring-brand-200",
+  green: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   amber: "bg-saffron-50 text-saffron-700 ring-saffron-100",
   red: "bg-red-50 text-red-700 ring-red-200",
   gray: "bg-slate-100 text-slate-600 ring-slate-200",
@@ -56,7 +56,7 @@ export function Field({ label, name, error, hint, className, ...p }: {
 
 export function Alert({ tone = "red", children }: { tone?: "red" | "green"; children: React.ReactNode }) {
   return (
-    <div role={tone === "red" ? "alert" : "status"} className={cn("rounded-lg border px-3.5 py-2.5 text-sm", tone === "red" ? "border-red-200 bg-red-50 text-red-700" : "border-brand-200 bg-brand-50 text-brand-800")}>
+    <div role={tone === "red" ? "alert" : "status"} className={cn("rounded-lg border px-3.5 py-2.5 text-sm", tone === "red" ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-800")}>
       {children}
     </div>
   );
