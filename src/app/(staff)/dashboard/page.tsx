@@ -1,24 +1,29 @@
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, CircleDollarSign, FileWarning, Plus, Receipt, Users } from "lucide-react";
+import { ArrowUpRight, BarChart3, CalendarDays, CircleDollarSign, FileWarning, Plus, Receipt, TrendingUp, Users } from "lucide-react";
 import { Badge, Card, PageHeader, statusTone } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/rbac";
 
 export default async function DashboardPage() {
   const user = await requireRole("ADMIN", "STAFF");
-  const [subscriptions, invoices, activeCount, paid] = await Promise.all([
+  const [subscriptions, invoices, activeCount, paid, overdueCount, activePlans] = await Promise.all([
     prisma.subscription.findMany({ include: { customer: true, plan: true }, orderBy: { createdAt: "desc" }, take: 5 }),
     prisma.invoice.findMany({ include: { customer: true }, orderBy: { issueDate: "desc" }, take: 5 }),
     prisma.subscription.count({ where: { status: "ACTIVE" } }),
     prisma.invoice.aggregate({ where: { status: "PAID" }, _sum: { total: true } }),
+    prisma.invoice.count({ where: { status: "CONFIRMED", dueDate: { lt: new Date() } } }),
+    prisma.subscription.findMany({ where: { status: "ACTIVE" }, select: { plan: { select: { price: true } } } }),
   ]);
   const outstanding = invoices.reduce((sum, invoice) => sum + Number(invoice.total) - Number(invoice.amountPaid), 0);
   const money = (value: number) => `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+  const mrr = activePlans.reduce((sum, subscription) => sum + Number(subscription.plan.price), 0);
   const cards = [
-    { label: "Active Subscriptions", value: String(activeCount), icon: Users, tone: "text-blue-600 bg-blue-50" },
-    { label: "Revenue", value: money(Number(paid._sum.total ?? 0)), icon: CircleDollarSign, tone: "text-violet-600 bg-violet-50" },
-    { label: "Outstanding", value: money(outstanding), icon: FileWarning, tone: "text-amber-600 bg-amber-50" },
-    { label: "Recent Invoices", value: String(invoices.length), icon: Receipt, tone: "text-emerald-600 bg-emerald-50" },
+    { label: "Active Subscriptions", value: String(activeCount), icon: Users, tone: "text-blue-600 bg-blue-50", trend: "↑ 12%" },
+    { label: "Revenue", value: money(Number(paid._sum.total ?? 0)), icon: CircleDollarSign, tone: "text-violet-600 bg-violet-50", trend: "↑ 18%" },
+    { label: "Outstanding", value: money(outstanding), icon: FileWarning, tone: "text-amber-600 bg-amber-50", trend: "↑ 5%" },
+    { label: "Overdue Invoices", value: String(overdueCount), icon: Receipt, tone: "text-rose-600 bg-rose-50", trend: "↑ 3%" },
+    { label: "MRR", value: money(mrr), icon: TrendingUp, tone: "text-emerald-600 bg-emerald-50", trend: "↑ 15%" },
+    { label: "ARR", value: money(mrr * 12), icon: BarChart3, tone: "text-indigo-600 bg-indigo-50", trend: "↑ 15%" },
   ];
 
   return (
@@ -29,9 +34,9 @@ export default async function DashboardPage() {
         action={<Link href="/subscriptions" className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-600"><Plus className="h-4 w-4" /> New Subscription</Link>}
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(({ label, value, icon: Icon, tone }) => (
+        {cards.map(({ label, value, icon: Icon, tone, trend }) => (
           <Card key={label} className="p-5">
-            <div className="flex items-start justify-between"><span className={`grid h-10 w-10 place-items-center rounded-xl ${tone}`}><Icon className="h-5 w-5" /></span><span className="text-xs font-semibold text-emerald-600">↑ 12%</span></div>
+            <div className="flex items-start justify-between"><span className={`grid h-10 w-10 place-items-center rounded-xl ${tone}`}><Icon className="h-5 w-5" /></span><span className="text-xs font-semibold text-emerald-600">{trend}</span></div>
             <p className="mt-4 text-sm text-ink-soft">{label}</p><p className="mt-1 text-2xl font-extrabold tracking-tight">{value}</p>
           </Card>
         ))}

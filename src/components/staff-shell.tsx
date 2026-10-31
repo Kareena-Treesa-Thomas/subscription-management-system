@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BadgePercent, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, UserPlus, X } from "lucide-react";
+import { BadgePercent, Bell, CalendarDays, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, Search, UserPlus, X } from "lucide-react";
 import { Logo } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,9 @@ const NAV = [
   { label: "Subscriptions", href: "/subscriptions", icon: Repeat, roles: ["ADMIN", "STAFF"] },
   { label: "Invoices", href: "/invoices", icon: FileText, roles: ["ADMIN", "STAFF"] },
   { label: "Payments", href: "/payments", icon: CreditCard, roles: ["ADMIN", "STAFF"] },
-  { label: "Products & plans", href: "/products", icon: Package, roles: ["ADMIN"] },
+  { label: "Products", href: "/products", icon: Package, roles: ["ADMIN"] },
+  { label: "Plans", href: "/admin/catalog/plans", icon: Repeat, roles: ["ADMIN"] },
+  { label: "Taxes", href: "/admin/catalog/taxes", icon: FileText, roles: ["ADMIN"] },
   { label: "Discounts", href: "/discounts", icon: BadgePercent, roles: ["ADMIN"] },
   { label: "Staff", href: "/staff", icon: UserPlus, roles: ["ADMIN"] },
 ];
@@ -46,10 +48,13 @@ export function StaffShell({ role, topRight, children }: { role: string; topRigh
   return (
     <div className="min-h-screen bg-paper lg:grid lg:grid-cols-[256px_1fr]">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen flex-col bg-[#171A48] px-4 py-6 lg:flex">
-        <Logo light className="px-2" />
+      <aside className="sticky top-0 hidden h-screen flex-col bg-[#171A48] px-3 py-6 lg:flex">
+        <div className="px-2"><Logo light /></div>
         {links}
-        <p className="mt-auto px-3 text-xs text-brand-200/60">Brightloop Software<br />Billing console</p>
+        <div className="mt-auto rounded-2xl bg-gradient-to-br from-brand-700 to-brand-500 p-4 text-white shadow-lg">
+          <p className="text-sm font-bold">Brightloop</p>
+          <p className="mt-1 text-xs leading-5 text-brand-100">Smarter subscriptions.<br />Stronger business.</p>
+        </div>
       </aside>
 
       {/* Mobile drawer */}
@@ -72,6 +77,16 @@ export function StaffShell({ role, topRight, children }: { role: string; topRigh
             <Menu className="h-5 w-5" />
           </button>
           <div className="lg:hidden"><Logo /></div>
+          <div className="hidden items-center gap-3 md:flex">
+            <label className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-ink-mute" />
+              <input aria-label="Search subscriptions and invoices" placeholder="Search subscriptions, invoices..." className="h-10 w-72 rounded-xl border border-line bg-paper pl-9 pr-3 text-sm outline-none focus:border-brand-400" />
+            </label>
+            <button type="button" className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-white px-3 text-sm font-semibold text-ink-soft hover:border-brand-300">
+              <CalendarDays className="h-4 w-4" /> Last 6 Months
+            </button>
+            <button type="button" aria-label="Notifications" className="relative rounded-xl p-2 text-ink-soft hover:bg-paper"><Bell className="h-5 w-5" /><span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" /></button>
+          </div>
           <div className="ml-auto">{topRight}</div>
         </header>
         <main className="mx-auto max-w-[1400px] px-4 py-8 sm:px-8">{children}</main>
