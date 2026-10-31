@@ -24,3 +24,7 @@ export async function getApplicableDiscounts(ctx: DiscountContext): Promise<Disc
     return true;
   });
 }
+
+export async function recordDiscountUsage(discountId: string, db: Prisma.TransactionClient | typeof prisma = prisma) {
+  return db.discount.update({ where: { id: discountId }, data: { usedCount: { increment: 1 } } });
+}

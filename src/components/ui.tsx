@@ -2,10 +2,9 @@ import { cn } from "@/lib/utils";
 
 export function Logo({ light = false, className }: { light?: boolean; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5 font-display text-xl font-bold tracking-tight", light ? "text-white" : "text-ink", className)}>
-      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden>
-        <circle cx="16" cy="16" r="11" fill="none" stroke={light ? "#9FD6C8" : "#0E7C66"} strokeWidth="4" strokeDasharray="58 12" strokeLinecap="round" />
-        <circle cx="26.6" cy="10.5" r="3.4" fill="#F2A33A" />
+    <span className={cn("inline-flex items-center gap-2.5 font-sans text-xl font-extrabold tracking-tight", light ? "text-white" : "text-ink", className)}>
+      <svg width="34" height="34" viewBox="0 0 40 40" aria-hidden>
+        <path d="M5 20c0-7 5-12 11-12 4 0 7 2 9 5l-4 5c-1-2-3-3-5-3-3 0-5 2-5 5s2 5 5 5c2 0 4-1 5-3l4 5c-2 3-5 5-9 5-6 0-11-5-11-12Zm30 0c0 7-5 12-11 12-4 0-7-2-9-5l4-5c1 2 3 3 5 3 3 0 5-2 5-5s-2-5-5-5c-2 0-4 1-5 3l-4-5c2-3 5-5 9-5 6 0 11 5 11 12Z" fill={light ? "#8F82FF" : "#5543DC"} />
       </svg>
       Brightloop
     </span>

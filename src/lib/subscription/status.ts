@@ -5,7 +5,8 @@ const FLOW: Record<SubscriptionStatus, SubscriptionStatus[]> = {
   DRAFT: ["QUOTATION", "CLOSED"],
   QUOTATION: ["CONFIRMED", "CLOSED"],
   CONFIRMED: ["ACTIVE", "CLOSED"],
-  ACTIVE: ["CLOSED"],
+  ACTIVE: ["PAUSED", "CLOSED"],
+  PAUSED: ["ACTIVE", "CLOSED"],
   CLOSED: [],
 };
 

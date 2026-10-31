@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BadgePercent, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, UserPlus, X } from "lucide-react";
+import { BadgePercent, CreditCard, FileText, LayoutDashboard, Menu, Package, Repeat, Settings, UserPlus, X } from "lucide-react";
 import { Logo } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ const NAV = [
   { label: "Products & plans", href: "/products", icon: Package, roles: ["ADMIN", "STAFF"] },
   { label: "Discounts", href: "/discounts", icon: BadgePercent, roles: ["ADMIN"] },
   { label: "Staff", href: "/staff", icon: UserPlus, roles: ["ADMIN"] },
+  { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "STAFF"] },
 ];
 
 export function StaffShell({ role, topRight, children }: { role: string; topRight: React.ReactNode; children: React.ReactNode }) {
@@ -44,9 +45,9 @@ export function StaffShell({ role, topRight, children }: { role: string; topRigh
   );
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[256px_1fr]">
+    <div className="min-h-screen bg-paper lg:grid lg:grid-cols-[256px_1fr]">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen flex-col bg-brand-900 px-4 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-screen flex-col bg-[#171A48] px-4 py-6 lg:flex">
         <Logo light className="px-2" />
         {links}
         <p className="mt-auto px-3 text-xs text-brand-200/60">Brightloop Software<br />Billing console</p>
@@ -74,7 +75,7 @@ export function StaffShell({ role, topRight, children }: { role: string; topRigh
           <div className="lg:hidden"><Logo /></div>
           <div className="ml-auto">{topRight}</div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-8">{children}</main>
+        <main className="mx-auto max-w-[1400px] px-4 py-8 sm:px-8">{children}</main>
       </div>
     </div>
   );

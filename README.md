@@ -24,6 +24,8 @@ Odoo x Make-A-Ton 9.0 Kochi Hackathon 2026.
 - `src/lib/clock.ts` `getToday()`: use this instead of `new Date()` everywhere so "simulate date" works.
 
 ## Billing API (Kareena)
-`POST /api/billing/run` · `GET/POST /api/subscriptions` · `POST /api/subscriptions/from-template` · `POST /api/subscriptions/:id/transition` · `GET/POST /api/quotation-templates` · `GET /api/invoices` · `POST /api/invoices/:id/{confirm,cancel,send}` · `GET/POST /api/admin/simulate-date`
+`POST /api/billing/run` · `GET/POST /api/subscriptions` · `POST /api/subscriptions/from-template` · `POST /api/subscriptions/:id/transition` · `GET/POST /api/quotation-templates` · `GET /api/invoices` · `POST /api/invoices/:id/{confirm,cancel,send}` · `POST /api/invoices/:id/payments` · `GET/POST /api/admin/simulate-date`
+
+Payments accept `method`, positive `amount`, and optional `paidOn` and `note`. Payments may be partial; the invoice becomes `PAID` when the recorded total reaches the invoice total. Customers may pay only their own confirmed invoices.
 
 API role checks use the Auth.js session; unauthenticated requests receive 401 and disallowed roles receive 403. No development role-header bypass is enabled.

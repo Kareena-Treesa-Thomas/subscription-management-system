@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-const qty = z.number().int().positive();
-
 export const passwordRules = [
   { label: "At least 10 characters", test: (value: string) => value.length >= 10 },
   { label: "One uppercase letter", test: (value: string) => /[A-Z]/.test(value) },
@@ -10,43 +8,40 @@ export const passwordRules = [
   { label: "One special character", test: (value: string) => /[^A-Za-z0-9\s]/.test(value) },
 ];
 
-const emailSchema = z.string().trim().email("Enter a valid email address").transform((email) => email.toLowerCase());
-const passwordSchema = z.string().superRefine((value, ctx) => {
+const emailSchema = z.string().trim().toLowerCase().email("Enter a valid email address");
+const nameSchema = z.string().trim().min(2, "Enter your full name").max(80, "Name is too long");
+export const passwordSchema = z.string().superRefine((value, ctx) => {
   for (const rule of passwordRules) {
     if (!rule.test(value)) ctx.addIssue({ code: z.ZodIssueCode.custom, message: rule.label });
   }
 });
+
 const matchingPasswords = <T extends { password: string; confirmPassword: string }>(schema: z.ZodType<T>) =>
   schema.refine((value) => value.password === value.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
 
+export const signupSchema = matchingPasswords(z.object({
+  name: nameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  confirmPassword: z.string(),
+}));
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Enter your password"),
 });
-
-export const signupSchema = matchingPasswords(z.object({
-  name: z.string().trim().min(2, "Enter your name").max(100, "Name must be 100 characters or fewer"),
-  email: emailSchema,
-  password: passwordSchema,
-  confirmPassword: z.string(),
-}));
-
 export const forgotSchema = z.object({ email: emailSchema });
-
 export const resetSchema = matchingPasswords(z.object({
-  token: z.string().min(1, "Reset token is missing"),
+  token: z.string().min(10),
   password: passwordSchema,
   confirmPassword: z.string(),
 }));
+export const staffSchema = z.object({ name: nameSchema, email: emailSchema, password: passwordSchema });
 
-export const staffSchema = z.object({
-  name: z.string().trim().min(2, "Enter your name").max(100, "Name must be 100 characters or fewer"),
-  email: emailSchema,
-  password: passwordSchema,
-});
+const qty = z.number().int().positive();
 
 export const subscriptionLineInput = z.object({
   productId: z.string().min(1),
@@ -83,3 +78,10 @@ export const quotationTemplateInput = z.object({
 });
 
 export const simulateDateInput = z.object({ date: z.coerce.date().nullable() });
+
+export const paymentInput = z.object({
+  method: z.string().trim().min(1).max(40),
+  amount: z.coerce.number().positive(),
+  paidOn: z.coerce.date().optional(),
+  note: z.string().trim().max(500).optional(),
+});
