@@ -6,8 +6,8 @@ export type PlanRules = {
   minQuantity: number;
   availableFrom: Date | null;
   availableTo: Date | null;
-  autoCloseAtEnd: boolean;
-  closableEarly: boolean;
+  autoClose: boolean;
+  closable: boolean;
   pausable: boolean;
   renewable: boolean;
 };
@@ -26,7 +26,7 @@ export const meetsMinQuantity = (plan: Pick<PlanRules, "minQuantity">, qty: numb
 /** Drives portal buttons: can the customer pause / close / renew on this plan? */
 export function planAllows(plan: PlanRules, action: "pause" | "close" | "renew") {
   if (action === "pause") return plan.pausable;
-  if (action === "close") return plan.closableEarly;
+  if (action === "close") return plan.closable;
   return plan.renewable;
 }
 

@@ -69,11 +69,18 @@ model Plan {
   price         Decimal        @db.Decimal(12, 2)
   billingPeriod BillingPeriod
   minQuantity   Int            @default(1)
+  availableFrom DateTime?
+  availableTo   DateTime?
   autoClose     Boolean        @default(false)
   closable      Boolean        @default(true)
   pausable      Boolean        @default(true)
   renewable     Boolean        @default(true)
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
   subscriptions Subscription[]
+
+  @@index([active, billingPeriod])
 }
 
 model Subscription {
@@ -115,4 +122,88 @@ model Invoice {
   @@unique([subscriptionId, periodStart])
   @@index([status, dueDate])
   @@index([customerId])
+}
+
+enum ProductType {
+  SOFTWARE
+  ADDON
+  SERVICE
+  PHYSICAL
+}
+
+enum DiscountType {
+  FIXED
+  PERCENTAGE
+}
+
+enum DiscountScope {
+  PRODUCT
+  SUBSCRIPTION
+}
+
+model Tax {
+  id          String    @id @default(cuid())
+  name        String
+  ratePercent Decimal   @db.Decimal(5, 2)
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  products    Product[]
+
+  @@map("taxes")
+}
+
+model Product {
+  id         String           @id @default(cuid())
+  name       String
+  type       ProductType      @default(SOFTWARE)
+  salesPrice Decimal          @db.Decimal(12, 2)
+  costPrice  Decimal          @default(0) @db.Decimal(12, 2)
+  notes      String?
+  active     Boolean          @default(true)
+  taxId      String?
+  tax        Tax?             @relation(fields: [taxId], references: [id])
+  variants   ProductVariant[]
+  discounts  Discount[]
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([active])
+  @@index([name])
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  attribute  String
+  value      String
+  extraPrice Decimal  @default(0) @db.Decimal(12, 2)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([productId, attribute, value])
+  @@map("product_variants")
+}
+
+model Discount {
+  id                String        @id @default(cuid())
+  name              String
+  type              DiscountType
+  value             Decimal       @db.Decimal(12, 2)
+  scope             DiscountScope @default(SUBSCRIPTION)
+  productId         String?
+  product           Product?      @relation(fields: [productId], references: [id])
+  minPurchaseAmount Decimal?      @db.Decimal(12, 2)
+  minQuantity       Int?
+  startDate         DateTime
+  endDate           DateTime?
+  usageLimit        Int?
+  timesUsed         Int           @default(0)
+  active            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([active, startDate, endDate])
+  @@map("discounts")
 }

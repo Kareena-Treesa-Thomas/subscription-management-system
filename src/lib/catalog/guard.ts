@@ -1,14 +1,15 @@
-// TEMPORARY STUBS. Until Anjanapriya shares requireRole() (~11:00) these endpoints are OPEN.
-// When it lands, replace the bodies, e.g.:
-//   import { requireRole } from "@/lib/auth/requireRole";
-//   export const requireAdmin = () => requireRole(["ADMIN"]);
-//   export const requireStaff = () => requireRole(["ADMIN", "STAFF"]);
-// If requireRole throws a Response (401/403) or an error with a `status`, handle() in http.ts passes it through.
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 
-export async function requireAdmin(): Promise<void> {
-  /* TODO swap for requireRole(["ADMIN"]) */
+// API-safe role check: throws a JSON 401/403 Response (handle() in http.ts returns it).
+// requireRole() in rbac.ts redirects to a page, which is wrong for API routes.
+async function check(allowed: string[]) {
+  const session = await auth();
+  if (!session?.user) throw NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  if (!allowed.includes(session.user.role)) {
+    throw NextResponse.json({ error: "Not allowed" }, { status: 403 });
+  }
 }
 
-export async function requireStaff(): Promise<void> {
-  /* TODO swap for requireRole(["ADMIN", "STAFF"]) */
-}
+export const requireAdmin = () => check(["ADMIN"]);
+export const requireStaff = () => check(["ADMIN", "STAFF"]);

@@ -22,8 +22,8 @@ export async function seedCatalog(prisma: PrismaClient) {
 
   const plans = [
     { name: "Monthly", price: 1000, billingPeriod: "MONTHLY", pausable: true },
-    { name: "Yearly", price: 10000, billingPeriod: "YEARLY", minQuantity: 5, autoCloseAtEnd: true },
-    { name: "Weekly Trial", price: 300, billingPeriod: "WEEKLY", closableEarly: true },
+    { name: "Yearly", price: 10000, billingPeriod: "YEARLY", minQuantity: 5, autoClose: true },
+    { name: "Weekly Trial", price: 300, billingPeriod: "WEEKLY", closable: true },
   ] as const;
   for (const p of plans) await find(prisma.plan.findFirst({ where: { name: p.name } }), () => prisma.plan.create({ data: { ...p } }));
 

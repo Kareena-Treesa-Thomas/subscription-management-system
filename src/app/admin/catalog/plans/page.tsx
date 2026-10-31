@@ -16,8 +16,8 @@ export default function PlansPage() {
         { name: "minQuantity", label: "Minimum quantity", type: "number", step: "1", required: true, defaultValue: "1" },
         { name: "availableFrom", label: "Available from", type: "date" },
         { name: "availableTo", label: "Available until", type: "date" },
-        { name: "autoCloseAtEnd", label: "Close automatically when the plan ends", type: "checkbox" },
-        { name: "closableEarly", label: "Customer can close early", type: "checkbox", defaultValue: true },
+        { name: "autoClose", label: "Close automatically when the plan ends", type: "checkbox" },
+        { name: "closable", label: "Customer can close early", type: "checkbox", defaultValue: true },
         { name: "pausable", label: "Customer can pause", type: "checkbox" },
         { name: "renewable", label: "Customer can renew", type: "checkbox", defaultValue: true },
         { name: "active", label: "Active", type: "checkbox", defaultValue: true },
@@ -28,7 +28,7 @@ export default function PlansPage() {
         { key: "billingPeriod", label: "Billing" },
         { key: "minQuantity", label: "Min qty" },
         { key: "availability", label: "Available", render: (r) => `${fmtDate(r.availableFrom)} → ${fmtDate(r.availableTo)}` },
-        { key: "flags", label: "Auto-close / Early / Pause / Renew", render: (r) => [r.autoCloseAtEnd, r.closableEarly, r.pausable, r.renewable].map(yes).join(" / ") },
+        { key: "flags", label: "Auto-close / Early / Pause / Renew", render: (r) => [r.autoClose, r.closable, r.pausable, r.renewable].map(yes).join(" / ") },
         { key: "active", label: "Status", render: (r) => badge(r.active) },
       ]}
     />
