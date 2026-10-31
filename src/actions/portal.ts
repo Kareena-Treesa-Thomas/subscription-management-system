@@ -17,19 +17,20 @@ export async function changeSubscription(id: string, op: SubOp): Promise<{ error
   if (op === "pause") {
     if (!plan.pausable) return { error: "This plan can't be paused." };
     if (sub.status !== "ACTIVE") return { error: "Only active subscriptions can be paused." };
-    await prisma.subscription.update({ where: { id }, data: { status: "PAUSED" } });
+    if (sub.paused) return { error: "Already paused." };
+    await prisma.subscription.update({ where: { id }, data: { paused: true } });
   } else if (op === "resume") {
-    if (sub.status !== "PAUSED") return { error: "This subscription isn't paused." };
-    await prisma.subscription.update({ where: { id }, data: { status: "ACTIVE" } });
+    if (!sub.paused) return { error: "This subscription isn't paused." };
+    await prisma.subscription.update({ where: { id }, data: { paused: false } });
   } else if (op === "close") {
-    if (!plan.closable) return { error: "This plan can't be closed early." };
+    if (!plan.closableEarly) return { error: "This plan can't be closed early." };
     if (sub.status === "CLOSED") return { error: "Already closed." };
-    await prisma.subscription.update({ where: { id }, data: { status: "CLOSED", expiryDate: new Date() } });
+    await prisma.subscription.update({ where: { id }, data: { status: "CLOSED", paused: false, expiryDate: new Date() } });
   } else if (op === "renew") {
     if (!plan.renewable) return { error: "This plan can't be renewed." };
     if (!["ACTIVE", "CLOSED"].includes(sub.status)) return { error: "Only active or closed subscriptions can be renewed." };
     const base = sub.expiryDate && sub.expiryDate > new Date() ? sub.expiryDate : new Date();
-    await prisma.subscription.update({ where: { id }, data: { status: "ACTIVE", expiryDate: addPeriod(base, plan.billingPeriod) } });
+    await prisma.subscription.update({ where: { id }, data: { status: "ACTIVE", paused: false, expiryDate: addPeriod(base, plan.billingPeriod) } });
   }
 
   revalidatePath("/portal");

@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useFormState } from "react-dom";
+import { useActionState, useState } from "react";
 import { Alert, Field } from "@/components/ui";
 import { PasswordField } from "@/components/password-field";
 import { SubmitButton } from "@/components/submit-button";
@@ -16,14 +15,17 @@ type Errs = Record<string, string[] | undefined>;
 
 /** Shared wiring: client-side Zod check first, then the server action (which re-validates). */
 function useZodAction(action: (s: FormState, fd: FormData) => Promise<FormState>, schema: Parameters<typeof validateForm>[0]) {
-  const [state, formAction] = useFormState(action, initial);
+  const [state, formAction] = useActionState(action, initial);
   const [clientErrors, setClientErrors] = useState<Errs>({});
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const errs = validateForm(schema, e.currentTarget);
     setClientErrors(errs);
     if (Object.keys(errs).length) e.preventDefault();
   };
-  const err = (k: string) => (clientErrors[k] ?? state.fieldErrors?.[k])?.[0];
+  const err = (k: string) => {
+    const messages = clientErrors[k] ?? state.fieldErrors?.[k];
+    return messages?.length ? messages.join(". ") : undefined;
+  };
   return { state, formAction, onSubmit, err };
 }
 

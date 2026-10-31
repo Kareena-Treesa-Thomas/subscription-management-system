@@ -12,7 +12,7 @@ export default async function PortalHome() {
 
   // Always scoped to the signed-in customer — never trust an id from the URL.
   const [subs, outstanding] = await Promise.all([
-    prisma.subscription.findMany({ where: { customerId: user.id }, include: { plan: true }, orderBy: { createdAt: "desc" } }),
+    prisma.subscription.findMany({ where: { customerId: user.id }, include: { plan: true, lines: true }, orderBy: { createdAt: "desc" } }),
     prisma.invoice.aggregate({ where: { customerId: user.id, status: "CONFIRMED" }, _sum: { total: true }, _count: true }),
   ]);
 
@@ -41,29 +41,34 @@ export default async function PortalHome() {
         <EmptyState title="No subscriptions yet" body="When your Brightloop team sets up a plan for you, it will show up here." />
       ) : (
         <div className="space-y-4">
-          {subs.map((s) => (
-            <Card key={s.id} className="p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs text-ink-mute">{s.number}</p>
-                  <h3 className="mt-0.5 font-semibold">{s.plan.name}</h3>
-                  <p className="mt-0.5 text-sm text-ink-soft">
-                    {money(Number(s.plan.price))} per {periodLabel(s.plan.billingPeriod)} × {s.quantity} {s.quantity === 1 ? "seat" : "seats"}
-                  </p>
+          {subs.map((s) => {
+            const status = s.paused ? "PAUSED" : s.status;
+            const quantity = s.lines.reduce((total, line) => total + line.quantity, 0);
+            const recurringTotal = s.lines.reduce((total, line) => total + Number(line.amount), 0);
+            return (
+              <Card key={s.id} className="p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-ink-mute">{s.number}</p>
+                    <h3 className="mt-0.5 font-semibold">{s.plan.name}</h3>
+                    <p className="mt-0.5 text-sm text-ink-soft">
+                      {money(Number(s.plan.price))} per {periodLabel(s.plan.billingPeriod)} × {quantity} {quantity === 1 ? "seat" : "seats"}
+                    </p>
+                  </div>
+                  <Badge tone={statusTone[status]}>{status.charAt(0) + status.slice(1).toLowerCase()}</Badge>
                 </div>
-                <Badge tone={statusTone[s.status]}>{s.status.charAt(0) + s.status.slice(1).toLowerCase()}</Badge>
-              </div>
-              <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-                <div><dt className="text-ink-mute">Started</dt><dd className="font-medium">{fmtDate(s.startDate)}</dd></div>
-                <div><dt className="text-ink-mute">Expires</dt><dd className="font-medium">{fmtDate(s.expiryDate)}</dd></div>
-                <div><dt className="text-ink-mute">Payment terms</dt><dd className="font-medium">{s.paymentTerms}</dd></div>
-                <div><dt className="text-ink-mute">Recurring total</dt><dd className="font-medium">{money(Number(s.plan.price) * s.quantity)}</dd></div>
-              </dl>
-              <div className="mt-4 border-t border-line pt-4">
-                <SubscriptionActions id={s.id} status={s.status} pausable={s.plan.pausable} closable={s.plan.closable} renewable={s.plan.renewable} />
-              </div>
-            </Card>
-          ))}
+                <dl className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+                  <div><dt className="text-ink-mute">Started</dt><dd className="font-medium">{fmtDate(s.startDate)}</dd></div>
+                  <div><dt className="text-ink-mute">Expires</dt><dd className="font-medium">{fmtDate(s.expiryDate)}</dd></div>
+                  <div><dt className="text-ink-mute">Payment terms</dt><dd className="font-medium">{s.paymentTerms}</dd></div>
+                  <div><dt className="text-ink-mute">Recurring total</dt><dd className="font-medium">{money(recurringTotal)}</dd></div>
+                </dl>
+                <div className="mt-4 border-t border-line pt-4">
+                  <SubscriptionActions id={s.id} status={status} pausable={s.plan.pausable} closable={s.plan.closableEarly} renewable={s.plan.renewable} />
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </>

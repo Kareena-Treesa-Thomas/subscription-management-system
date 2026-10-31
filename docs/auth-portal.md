@@ -26,8 +26,8 @@ Demo logins (password `Admin@12345`): admin@brightloop.test, staff@brightloop.te
 - Replace `(staff)/dashboard/page.tsx` (Shivani). Sidebar links 404 until teammates merge their pages.
 - Add a nav item: edit the `NAV` array in `staff-shell.tsx`.
 
-## Merge notes (schema)
-`prisma/schema.prisma` has minimal Plan/Subscription/Invoice so this runs alone. When merging with Kareena's schema, keep her models and add mine: `User.role`, `User.passwordHash`, `PasswordResetToken`, and `PAUSED` in `SubscriptionStatus`. The portal reads: `Subscription{number,status,quantity,startDate,expiryDate,paymentTerms,plan}`, `Plan{name,price,billingPeriod,pausable,closable,renewable}`, `Invoice{number,status,periodStart,periodEnd,dueDate,total}`. Rename fields in `portal/page.tsx` if hers differ.
+## Schema integration
+The portal uses Kareena's `Subscription.paused` boolean while keeping the database status `ACTIVE`; the UI maps paused rows to a `PAUSED` badge and passes that state to the pause/resume controls. Quantity and recurring totals come from `Subscription.lines`, and early closing uses `Plan.closableEarly`. The API role guard reads the Auth.js session and does not accept a development role header.
 
 ## Notes
 - `bcryptjs` (pure JS) instead of `bcrypt`: no native build problems on Windows.

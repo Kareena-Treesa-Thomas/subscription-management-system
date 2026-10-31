@@ -7,9 +7,10 @@ export const metadata = { title: "My invoices — Brightloop" };
 export const dynamic = "force-dynamic";
 const PAGE_SIZE = 10;
 
-export default async function PortalInvoices({ searchParams }: { searchParams: { page?: string } }) {
+export default async function PortalInvoices({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const user = await requireRole("CUSTOMER");
-  const page = Math.max(1, Number(searchParams.page) || 1);
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
   const where = { customerId: user.id, status: { not: "DRAFT" as const } }; // customers never see drafts
 
   const [invoices, total] = await Promise.all([
