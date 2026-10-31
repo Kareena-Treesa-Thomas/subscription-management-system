@@ -269,6 +269,34 @@ The local seed creates:
 The customer account is useful for verifying portal isolation. Add staff
 accounts through the administrative flow rather than sharing credentials.
 
+### Login experience
+
+The login screen provides separate entry points for the two user experiences:
+
+```text
+/login?role=admin
+/login?role=customer
+```
+
+The role selector changes the page heading and displays the matching local demo
+account. The selected role is only a UI convenience; authorization is still
+determined by the authenticated Auth.js session and the role stored in the
+database.
+
+After authentication:
+
+- Admin and staff users are redirected to `/dashboard`.
+- Customer users are redirected to `/portal`.
+- Customers attempting to open staff routes are redirected to `/portal`.
+- Staff users cannot open admin-only catalog and staff-management routes.
+- An authenticated user with an insufficient role receives `403` from a
+  protected API route.
+
+For a real account, use `/signup` instead of the seeded demo credentials.
+Password reset starts at `/forgot-password`; when SMTP is not configured for
+local development, the reset link is displayed in the response and server
+console.
+
 ## Application routes
 
 ### Public and authentication routes
